@@ -1,0 +1,42 @@
+-- database: ./tienda_2.db
+
+--AGREGACIÓN BÁSICA
+-- Ventas totales por producto
+SELECT producto_id, SUM(cantidad) as total_vendido, SUM(cantidad * precio_unitario) as ingresos_totales
+FROM detalle_pedidos
+GROUP BY producto_id;
+
+-- Estadísticas por pedido
+SELECT pedido_id, COUNT(*) as items_diferentes, SUM(cantidad) as cantidad_total, AVG(precio_unitario) as precio_promedio
+FROM detalle_pedidos
+GROUP BY pedido_id;
+
+--HAVING
+-- Productos con más de 1 unidad vendida total
+SELECT producto_id, SUM(cantidad) as total_vendido
+FROM detalle_pedidos
+GROUP BY producto_id
+HAVING SUM(cantidad) > 1;
+
+-- Pedidos con valor total > 150
+SELECT pedido_id, SUM(cantidad * precio_unitario) as valor_total
+FROM detalle_pedidos
+GROUP BY pedido_id
+HAVING SUM(cantidad * precio_unitario) > 150;
+
+--ANÁLISIS COMBINADO CON JOINS
+-- Ventas por ciudad usando JOIN + GROUP BY
+SELECT c.ciudad, COUNT(p.id) as num_pedidos, SUM(dp.cantidad * dp.precio_unitario) as ingresos_ciudad
+FROM clientes c
+LEFT JOIN pedidos p ON c.id = p.cliente_id
+LEFT JOIN detalle_pedidos dp ON p.id = dp.pedido_id
+GROUP BY c.ciudad
+HAVING SUM(dp.cantidad * dp.precio_unitario) > 0;
+
+--QUERY DE PRUEBA USANDO FUCIONES AUSENTES
+SELECT c.ciudad, 
+    MIN(p.total) AS pedido_menor,
+    MAX(p.total) AS pedido_mayor
+FROM pedidos p
+JOIN clientes c ON p.cliente_id = c.id
+GROUP BY c.ciudad;
